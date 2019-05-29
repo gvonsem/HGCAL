@@ -1,0 +1,8 @@
+I have added the gan_test script for getting an idea.
+Right now it works with convolutional filters, but everything needed for the graphs is already in the small converted test sample.
+This sample is in:
+/eos/home-j/jkiesele/DeepNtuples/GraphGAN_test
+
+The training files can be found in 'conv', the test ones in 'test'.
+
+
