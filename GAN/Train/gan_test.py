@@ -9,10 +9,11 @@ from keras.layers import RepeatVector,GaussianNoise,LeakyReLU, Dense, Conv2D,Con
 
     
 
-from DeepJetCore.Layers import ScalarMultiply, Print, ReplaceByNoise, FeedForward
+from DeepJetCore.Layers import ScalarMultiply, Print, ReplaceByNoise, FeedForward, ReduceSumEntirely
 def d_model(Inputs):
     
     x = Inputs[0] 
+    x_sum = ReduceSumEntirely()(x)
     x1 = Inputs[1] #coordinates
     x2 = Inputs[2] #rest global
     x2 = RepeatVector(int(x.shape[1])*int(x.shape[1]))(x2)
@@ -36,7 +37,7 @@ def d_model(Inputs):
     #only_for_gan=Inputs[2]
     
     x = Flatten()(x)
-    #x = Concatenate()([x,x1])
+    x = Concatenate()([x,x_sum])
     x = Dense(16,activation='relu')(x) #discriminator
     x = Dense(1,activation='sigmoid')(x) #discriminator
     predictions = [x]
@@ -54,6 +55,7 @@ def g_model(Inputs):
     x2 = Inputs[2] #rest global
     x2 = RepeatVector(int(x.shape[1])*int(x.shape[1]))(x2)
     x2 = Reshape((int(x.shape[1]),int(x.shape[2]),int(x2.shape[-1])))(x2)
+    x2 = ScalarMultiply(1./(24.*24.))(x2)
     
     x = Concatenate()([x2,x])
     x = Conv2D(16,(1,1),padding='same')(x)
@@ -71,7 +73,7 @@ def g_model(Inputs):
     return Model(inputs=Inputs, outputs=[x]+feed_forward,name='generator')
 
 
-train=training_base(testrun=True,testrun_fraction=0.05, resumeSilently=False,renewtokens=True)
+train=training_base(testrun=False,testrun_fraction=0.05, resumeSilently=False,renewtokens=True)
 
 train.setGANModel(g_model, d_model)
     
